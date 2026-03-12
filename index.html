@@ -11,7 +11,7 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #333; /* Warna background luar kanvas */
+            background-color: #333;
         }
 
         #game-container {
@@ -20,21 +20,18 @@
             height: 288px;
             background-color: #000;
             overflow: hidden;
-            /* Memastikan scaling rapi jika ingin dibesarkan nantinya */
             transform-origin: center;
         }
 
-        /* Layer Gambar */
         .layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 512px;
             height: 288px;
-            pointer-events: none; /* Agar tidak menghalangi klik tombol */
+            pointer-events: none;
         }
 
-        /* Base Text Box Styling */
         .text-box {
             position: absolute;
             display: flex;
@@ -46,47 +43,46 @@
             color: #000;
             height: 32px;
             pointer-events: none;
+            white-space: nowrap; /* Mencegah teks turun ke baris baru jika panjang */
         }
 
-        /* Mengatur ukuran dan posisi subscript agar lebih kentara ukurannya */
         .text-box sub {
             font-size: 10px; 
             vertical-align: sub; 
             margin-left: 1px; 
         }
 
-        /* Koordinat Text Box */
         #text-h {
-            left: 64px;  /* Kolom c */
-            top: 192px;  /* Baris 7 */
-            width: 96px; /* c, d, e (3 kolom) */
+            left: 64px;  
+            top: 192px;  
+            width: 96px; 
         }
 
         #text-o {
-            left: 192px; /* Kolom g */
-            top: 192px;  /* Baris 7 */
-            width: 96px; /* g, h, i (3 kolom) */
+            left: 192px; 
+            top: 192px;  
+            width: 96px; 
         }
 
         #text-h2o {
-            left: 320px; /* Kolom k */
-            top: 192px;  /* Baris 7 */
-            width: 128px; /* k, l, m, n (4 kolom) */
+            left: 320px; 
+            top: 192px;  
+            width: 128px; 
+            transition: font-size 0.2s ease; /* Transisi halus saat ukuran font mengecil */
         }
 
-        /* Koordinat Tombol Interaksi (Transparan) */
         .btn {
             position: absolute;
             width: 32px;
             height: 32px;
-            top: 224px; /* Baris 8 */
+            top: 224px; 
             cursor: pointer;
         }
 
-        #btn-h-min { left: 64px; }  /* c8 */
-        #btn-h-plus { left: 128px; } /* e8 */
-        #btn-o-min { left: 192px; } /* g8 */
-        #btn-o-plus { left: 256px; } /* i8 */
+        #btn-h-min { left: 64px; }  
+        #btn-h-plus { left: 128px; } 
+        #btn-o-min { left: 192px; } 
+        #btn-o-plus { left: 256px; } 
 
     </style>
 </head>
@@ -94,7 +90,6 @@
 
     <div id="game-container">
         <img id="bg-canvas" class="layer" src="kanvaspb.png" alt="Canvas Dasar">
-        
         <img id="anim-layer" class="layer" src="pbh1o1.gif" alt="Animasi Reaksi">
 
         <div id="text-h" class="text-box">H<sub>2(g)</sub></div>
@@ -108,17 +103,14 @@
     </div>
 
     <script>
-        // Nilai awal reaktan
         let h = 1;
         let o = 1;
 
-        // Mendapatkan elemen DOM
         const animLayer = document.getElementById('anim-layer');
         const textH = document.getElementById('text-h');
         const textO = document.getElementById('text-o');
         const textH2O = document.getElementById('text-h2o');
 
-        // Fungsi memperbarui reaktan
         function updateReaktan(tipe, nilai) {
             if (tipe === 'h') {
                 h += nilai;
@@ -132,23 +124,54 @@
             renderDisplay();
         }
 
-        // Fungsi memperbarui tampilan layar
         function renderDisplay() {
-            // 1. Update layer GIF
+            // 1. Update GIF Layer
             animLayer.src = `pbh${h}o${o}.gif`;
 
-            // 2. Update teks H2
+            // 2. Update Teks Reaktan
             let labelH = h === 1 ? '' : `${h} `;
             textH.innerHTML = `${labelH}H<sub>2(g)</sub>`;
 
-            // 3. Update teks O2
             let labelO = o === 1 ? '' : `${o} `;
             textO.innerHTML = `${labelO}O<sub>2(g)</sub>`;
 
-            // 4. Update teks Produk
-            let h2oTerbentuk = Math.floor(Math.min(h, o * 2)); 
-            let labelH2O = (h2oTerbentuk <= 1) ? '' : `${h2oTerbentuk} `;
-            textH2O.innerHTML = `${labelH2O}H<sub>2</sub>O<sub>(l)</sub>`;
+            // 3. Logika Stoikiometri & Pereaksi Pembatas
+            let h2oTerbentuk = Math.min(h, o * 2); 
+            let sisaH = h - h2oTerbentuk;
+            let sisaO = o - (h2oTerbentuk / 2);
+
+            let produkText = "";
+
+            // Format Air (H2O)
+            if (h2oTerbentuk > 0) {
+                let labelH2O = (h2oTerbentuk === 1) ? '' : `${h2oTerbentuk} `;
+                produkText += `${labelH2O}H<sub>2</sub>O<sub>(l)</sub>`;
+            }
+
+            // Format Sisa Hidrogen
+            if (sisaH > 0) {
+                if (produkText !== "") produkText += " + ";
+                let labelSisaH = (sisaH === 1) ? '' : `${sisaH} `;
+                produkText += `${labelSisaH}H<sub>2(g)</sub>`;
+            }
+
+            // Format Sisa Oksigen
+            if (sisaO > 0) {
+                if (produkText !== "") produkText += " + ";
+                // Jika sisanya 0.5 molekul O2, tampilkan sebagai pecahan ½ agar estetis
+                let labelSisaO = (sisaO === 1) ? '' : (sisaO === 0.5 ? '½ ' : `${sisaO} `);
+                produkText += `${labelSisaO}O<sub>2(g)</sub>`;
+            }
+
+            // 4. Penyesuaian Dinamis UI
+            // Jika teks panjang karena ada sisa, kecilkan font agar tidak melampaui lebar kanvas
+            if (sisaH > 0 || sisaO > 0) {
+                textH2O.style.fontSize = "11px"; 
+            } else {
+                textH2O.style.fontSize = "16px"; 
+            }
+
+            textH2O.innerHTML = produkText;
         }
 
         window.onload = () => {
