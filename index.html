@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Perbandingan Reaktan</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #333; /* Warna background luar kanvas */
+        }
+
+        #game-container {
+            position: relative;
+            width: 512px;
+            height: 288px;
+            background-color: #000;
+            overflow: hidden;
+            /* Memastikan scaling rapi jika ingin dibesarkan nantinya */
+            transform-origin: center;
+        }
+
+        /* Layer Gambar */
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 512px;
+            height: 288px;
+            pointer-events: none; /* Agar tidak menghalangi klik tombol */
+        }
+
+        /* Base Text Box Styling */
+        .text-box {
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #000;
+            height: 32px;
+            pointer-events: none;
+        }
+
+        /* Koordinat Text Box */
+        #text-h {
+            left: 64px;  /* Kolom c */
+            top: 192px;  /* Baris 7 */
+            width: 96px; /* c, d, e (3 kolom) */
+        }
+
+        #text-o {
+            left: 192px; /* Kolom g */
+            top: 192px;  /* Baris 7 */
+            width: 96px; /* g, h, i (3 kolom) */
+        }
+
+        #text-h2o {
+            left: 320px; /* Kolom k */
+            top: 192px;  /* Baris 7 */
+            width: 128px; /* k, l, m, n (4 kolom) */
+        }
+
+        /* Koordinat Tombol Interaksi (Transparan) */
+        .btn {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            top: 224px; /* Baris 8 */
+            cursor: pointer;
+            /* Border merah/biru dibawah ini bisa di-uncomment untuk debugging posisi */
+            /* border: 1px solid rgba(255, 0, 0, 0.5); */
+            /* box-sizing: border-box; */
+        }
+
+        #btn-h-min { left: 64px; }  /* c8 */
+        #btn-h-plus { left: 128px; } /* e8 */
+        #btn-o-min { left: 192px; } /* g8 */
+        #btn-o-plus { left: 256px; } /* i8 */
+
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <img id="bg-canvas" class="layer" src="kanvaspb.png" alt="Canvas Dasar">
+        
+        <img id="anim-layer" class="layer" src="pbh1o1.gif" alt="Animasi Reaksi">
+
+        <div id="text-h" class="text-box">H<sub>2(g)</sub></div>
+        <div id="text-o" class="text-box">O<sub>2(g)</sub></div>
+        <div id="text-h2o" class="text-box">H<sub>2</sub>O<sub>(l)</sub></div>
+
+        <div id="btn-h-min" class="btn" onclick="updateReaktan('h', -1)"></div>
+        <div id="btn-h-plus" class="btn" onclick="updateReaktan('h', 1)"></div>
+        <div id="btn-o-min" class="btn" onclick="updateReaktan('o', -1)"></div>
+        <div id="btn-o-plus" class="btn" onclick="updateReaktan('o', 1)"></div>
+    </div>
+
+    <script>
+        // Nilai awal reaktan
+        let h = 1;
+        let o = 1;
+
+        // Mendapatkan elemen DOM
+        const animLayer = document.getElementById('anim-layer');
+        const textH = document.getElementById('text-h');
+        const textO = document.getElementById('text-o');
+        const textH2O = document.getElementById('text-h2o');
+
+        // Fungsi memperbarui reaktan
+        function updateReaktan(tipe, nilai) {
+            if (tipe === 'h') {
+                h += nilai;
+                if (h < 1) h = 1;
+                if (h > 4) h = 4;
+            } else if (tipe === 'o') {
+                o += nilai;
+                if (o < 1) o = 1;
+                if (o > 4) o = 4;
+            }
+            renderDisplay();
+        }
+
+        // Fungsi memperbarui tampilan layar
+        function renderDisplay() {
+            // 1. Update layer GIF
+            animLayer.src = `pbh${h}o${o}.gif`;
+
+            // 2. Update teks H2
+            let labelH = h === 1 ? '' : `${h} `;
+            textH.innerHTML = `${labelH}H<sub>2(g)</sub>`;
+
+            // 3. Update teks O2
+            let labelO = o === 1 ? '' : `${o} `;
+            textO.innerHTML = `${labelO}O<sub>2(g)</sub>`;
+
+            // 4. Update teks Produk (Stoikiometri: 2H2 + O2 -> 2H2O)
+            // Menghitung jumlah produk H2O berdasarkan pereaksi pembatas
+            let h2oTerbentuk = Math.floor(Math.min(h, o * 2)); 
+            
+            // Jika hasilnya 0 (walaupun di simulasi ini minimal 1), atau 1, angka tidak ditulis
+            let labelH2O = (h2oTerbentuk <= 1) ? '' : `${h2oTerbentuk} `;
+            textH2O.innerHTML = `${labelH2O}H<sub>2</sub>O<sub>(l)</sub>`;
+        }
+
+        // Panggil render pertama kali untuk memastikan sinkronisasi
+        window.onload = () => {
+            renderDisplay();
+        };
+    </script>
+
+</body>
+</html>
