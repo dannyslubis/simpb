@@ -38,7 +38,7 @@
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
-            font-size: 16px; /* Ukuran dikunci tetap statis */
+            font-size: 16px; 
             font-weight: bold;
             color: #000;
             height: 32px;
@@ -46,7 +46,6 @@
             white-space: nowrap; 
         }
 
-        /* Menggunakan em agar ukurannya selalu proporsional terhadap teks utamanya */
         .text-box sub {
             font-size: 0.6em; 
             vertical-align: sub; 
@@ -65,11 +64,11 @@
             width: 96px; 
         }
 
-        /* Diperlebar hingga kolom p (192px) agar teks sisa reaktan yang panjang tidak terpotong */
+        /* Dikembalikan ke 128px (kolom k, l, m, n) agar center-nya pas di kotak putih */
         #text-h2o {
             left: 320px; 
             top: 192px;  
-            width: 192px; 
+            width: 128px; 
         }
 
         .btn {
@@ -126,40 +125,33 @@
         }
 
         function renderDisplay() {
-            // 1. Update GIF Layer
             animLayer.src = `pbh${h}o${o}.gif`;
 
-            // 2. Update Teks Reaktan
             let labelH = h === 1 ? '' : `${h} `;
             textH.innerHTML = `${labelH}H<sub>2(g)</sub>`;
 
             let labelO = o === 1 ? '' : `${o} `;
             textO.innerHTML = `${labelO}O<sub>2(g)</sub>`;
 
-            // 3. Logika Stoikiometri & Pereaksi Pembatas
             let h2oTerbentuk = Math.min(h, o * 2); 
             let sisaH = h - h2oTerbentuk;
             let sisaO = o - (h2oTerbentuk / 2);
 
             let produkText = "";
 
-            // Format Air (H2O)
             if (h2oTerbentuk > 0) {
                 let labelH2O = (h2oTerbentuk === 1) ? '' : `${h2oTerbentuk} `;
                 produkText += `${labelH2O}H<sub>2</sub>O<sub>(l)</sub>`;
             }
 
-            // Format Sisa Hidrogen
             if (sisaH > 0) {
                 if (produkText !== "") produkText += " + ";
                 let labelSisaH = (sisaH === 1) ? '' : `${sisaH} `;
                 produkText += `${labelSisaH}H<sub>2(g)</sub>`;
             }
 
-            // Format Sisa Oksigen
             if (sisaO > 0) {
                 if (produkText !== "") produkText += " + ";
-                // Tampilkan pecahan untuk 0.5 molekul
                 let labelSisaO = (sisaO === 1) ? '' : (sisaO === 0.5 ? '½ ' : (sisaO === 1.5 ? '1½ ' : (sisaO === 2.5 ? '2½ ' : (sisaO === 3.5 ? '3½ ' : `${sisaO} `))));
                 produkText += `${labelSisaO}O<sub>2(g)</sub>`;
             }
