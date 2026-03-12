@@ -48,6 +48,13 @@
             pointer-events: none;
         }
 
+        /* Mengatur ukuran dan posisi subscript agar lebih kentara ukurannya */
+        .text-box sub {
+            font-size: 10px; 
+            vertical-align: sub; 
+            margin-left: 1px; 
+        }
+
         /* Koordinat Text Box */
         #text-h {
             left: 64px;  /* Kolom c */
@@ -74,9 +81,6 @@
             height: 32px;
             top: 224px; /* Baris 8 */
             cursor: pointer;
-            /* Border merah/biru dibawah ini bisa di-uncomment untuk debugging posisi */
-            /* border: 1px solid rgba(255, 0, 0, 0.5); */
-            /* box-sizing: border-box; */
         }
 
         #btn-h-min { left: 64px; }  /* c8 */
@@ -141,16 +145,12 @@
             let labelO = o === 1 ? '' : `${o} `;
             textO.innerHTML = `${labelO}O<sub>2(g)</sub>`;
 
-            // 4. Update teks Produk (Stoikiometri: 2H2 + O2 -> 2H2O)
-            // Menghitung jumlah produk H2O berdasarkan pereaksi pembatas
+            // 4. Update teks Produk
             let h2oTerbentuk = Math.floor(Math.min(h, o * 2)); 
-            
-            // Jika hasilnya 0 (walaupun di simulasi ini minimal 1), atau 1, angka tidak ditulis
             let labelH2O = (h2oTerbentuk <= 1) ? '' : `${h2oTerbentuk} `;
             textH2O.innerHTML = `${labelH2O}H<sub>2</sub>O<sub>(l)</sub>`;
         }
 
-        // Panggil render pertama kali untuk memastikan sinkronisasi
         window.onload = () => {
             renderDisplay();
         };
